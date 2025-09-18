@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data files (except motorways.fgb which is included)
+*.geojson
+*.gpkg
+*.shp
+*.dbf
+*.shx
+*.prj
+# Include the motorways data
+!motorways.fgb
+
+# Archive folder
+archive/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# Flask
+instance/
+.webassets-cache
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
