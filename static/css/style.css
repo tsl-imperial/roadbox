@@ -252,6 +252,31 @@ body {
 
 
 
+/* Lab attribution - styled like Leaflet attribution */
+.lab-attribution {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.lab-attribution div {
+    margin: 0;
+    display: inline;
+}
+
+.lab-attribution div:not(:last-child):after {
+    content: " | ";
+}
+
 /* Scale control styling for dark background */
 .leaflet-control-scale-line {
     background: rgba(255, 255, 255, 0.9) !important;
@@ -274,6 +299,13 @@ body {
         width: auto;
         max-height: 50vh;
         overflow-y: auto;
+    }
+
+    .lab-attribution {
+        top: 0;
+        bottom: auto;
+        font-size: 10px;
+        padding: 0 3px;
     }
 }
 

@@ -10,7 +10,7 @@ map.on('moveend zoomend', function() {
 });
 
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap contributors © CARTO'
+    attribution: '© OpenStreetMap contributors © CARTO | Road data: OS OpenRoads © Crown copyright'
 }).addTo(map);
 
 // Add scale control (ruler)

@@ -52,8 +52,8 @@ def start_server():
     print("🚀 Starting RoadBox Server...")
     print("="*50)
 
-    # Import and run the pathfinding server
-    from pathfinding import app
+    # Import and run the RoadBox app
+    from app import app
     import webbrowser
     from threading import Timer
 

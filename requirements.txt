@@ -1,8 +1,8 @@
-Flask==2.3.3
-flask-cors==4.0.0
-geopandas==0.14.0
-networkx==3.1
-shapely==2.0.1
-igraph==0.11.3
-numpy==1.24.3
-scipy==1.11.2
+Flask
+flask-cors
+geopandas
+networkx
+shapely
+igraph
+numpy
+scipy
