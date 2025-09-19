@@ -208,7 +208,7 @@ def _get_largest_component(G: nx.Graph) -> nx.Graph:
 
 def _build_igraph(G: nx.Graph):
     """
-    Convert NetworkX graph to igraph for ultra-fast routing
+    Convert NetworkX graph to igraph for fast routing
 
     Why use both libraries?
     - NetworkX: Pure Python, full graph analysis capabilities
@@ -216,9 +216,7 @@ def _build_igraph(G: nx.Graph):
     """
     global _fast_graph, _node_mapping
 
-    print("Converting to igraph for ultra-fast routing...")
-    igraph_start = time.time()
-
+    print("Converting to igraph for fast routing...")
     # Create node mapping between NetworkX and iGraph indices
     node_list = list(G.nodes())
     node_to_index = {node: i for i, node in enumerate(node_list)}
@@ -242,9 +240,6 @@ def _build_igraph(G: nx.Graph):
         ig_graph.vs[i]['name'] = node
         ig_graph.vs[i]['lat'] = node_data['lat']
         ig_graph.vs[i]['lon'] = node_data['lon']
-
-    igraph_time = time.time() - igraph_start
-    print(f"Igraph conversion complete in {igraph_time:.2f}s - READY FOR LIGHTNING-FAST ROUTING!")
 
     # Store both representations
     _fast_graph = ig_graph
@@ -326,12 +321,11 @@ def find_route(start_lat: float, start_lng: float,
         print(f"Start node: {start_node} (distance: {start_dist:.6f}°)")
         print(f"End node: {end_node} (distance: {end_dist:.6f}°)")
 
-        # Step 2: Calculate shortest path using available algorithm
-        # Try fast igraph implementation first, fallback to NetworkX
-        if _fast_graph and _node_mapping:
-            path = _find_route_igraph(start_node, end_node, start_lng, start_lat, end_lng, end_lat)
-        else:
-            path = _find_route_networkx(graph, start_node, end_node, start_lng, start_lat, end_lng, end_lat)
+        # Step 2: Calculate shortest path using igraph (fast implementation)
+        if not (_fast_graph and _node_mapping):
+            return {'error': 'Fast routing not available - network not properly initialized'}
+
+        path = _find_route_igraph(start_node, end_node, start_lng, start_lat, end_lng, end_lat)
 
         return path
 
@@ -365,19 +359,6 @@ def _find_route_igraph(start_node: str, end_node: str,
     return _build_route_response(_road_network, path,
                                 start_lng, start_lat, end_lng, end_lat)
 
-
-def _find_route_networkx(graph: nx.Graph, start_node: str, end_node: str,
-                       start_lng: float, start_lat: float,
-                       end_lng: float, end_lat: float) -> Dict[str, Any]:
-    """
-    Find route using NetworkX library (fallback implementation)
-
-    NetworkX provides a clean Python implementation of shortest path algorithms
-    with full access to intermediate results and algorithm customization.
-    """
-    # Use NetworkX's implementation of Dijkstra's algorithm
-    path = nx.shortest_path(graph, start_node, end_node, weight='weight')
-    return _build_route_response(graph, path, start_lng, start_lat, end_lng, end_lat)
 
 
 def _build_route_response(graph: nx.Graph, path: List[str],

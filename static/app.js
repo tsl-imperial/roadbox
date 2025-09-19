@@ -1,3 +1,12 @@
+// Color constants
+const COLORS = {
+    PRIMARY: '#007cba',
+    DANGER: '#ff6b6b',
+    WARNING: '#ffa500',
+    SUCCESS: '#00ff00',
+    ROUTE: '#ffff00'
+};
+
 // Restore map state from localStorage or use defaults
 const savedCenter = JSON.parse(localStorage.getItem('mapCenter') || '[54.5, -2.0]');
 const savedZoom = parseInt(localStorage.getItem('mapZoom') || '6');
@@ -13,11 +22,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors © CARTO | Road data: OS OpenRoads © Crown copyright'
 }).addTo(map);
 
-// Add scale control (ruler)
+// Add scale control (ruler) - metric only for UK data
 L.control.scale({
     position: 'bottomright',
     metric: true,
-    imperial: true,
+    imperial: false,
     updateWhenIdle: false
 }).addTo(map);
 
@@ -37,31 +46,38 @@ let measureLine = null;
 let measureMarkers = [];
 let totalDistance = 0;
 
+// Helper functions
+function clearActiveButtons() {
+    document.getElementById('set-start').classList.remove('active');
+    document.getElementById('set-end').classList.remove('active');
+}
+
+function setCursor(cursor = '') {
+    map.getContainer().style.cursor = cursor;
+}
+
 // Simple marker icons
 const startIcon = L.divIcon({
-    html: '<div style="background: #00ff00; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+    html: `<div style="background: ${COLORS.SUCCESS}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10]
 });
 
 const endIcon = L.divIcon({
-    html: '<div style="background: #ff0000; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+    html: `<div style="background: red; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10]
 });
 
 const measureIcon = L.divIcon({
-    html: '<div style="background: #ffa500; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>',
+    html: `<div style="background: ${COLORS.WARNING}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>`,
     iconSize: [16, 16],
     iconAnchor: [8, 8]
 });
 
 function setMode(newMode) {
     mode = newMode;
-
-    // Remove active class from both buttons
-    document.getElementById('set-start').classList.remove('active');
-    document.getElementById('set-end').classList.remove('active');
+    clearActiveButtons();
 
     // Add active class to the selected button
     if (mode === 'start') {
@@ -70,7 +86,7 @@ function setMode(newMode) {
         document.getElementById('set-end').classList.add('active');
     }
 
-    map.getContainer().style.cursor = 'crosshair';
+    setCursor('crosshair');
 }
 
 map.on('click', function(e) {
@@ -90,10 +106,8 @@ map.on('click', function(e) {
             }
         });
         mode = null;
-        // Remove active classes when mode is cleared
-        document.getElementById('set-start').classList.remove('active');
-        document.getElementById('set-end').classList.remove('active');
-        map.getContainer().style.cursor = '';
+        clearActiveButtons();
+        setCursor();
         updateRouteButton();
     } else if (mode === 'end') {
         endPoint = e.latlng;
@@ -111,10 +125,8 @@ map.on('click', function(e) {
             }
         });
         mode = null;
-        // Remove active classes when mode is cleared
-        document.getElementById('set-start').classList.remove('active');
-        document.getElementById('set-end').classList.remove('active');
-        map.getContainer().style.cursor = '';
+        clearActiveButtons();
+        setCursor();
         updateRouteButton();
     } else if (measuring) {
         addMeasurePoint(e.latlng);
@@ -124,8 +136,8 @@ map.on('click', function(e) {
 function updateRouteButton() {
     const canRoute = startPoint && endPoint;
     document.getElementById('find-route').disabled = !canRoute;
-    document.getElementById('set-start').style.background = '#007cba';
-    document.getElementById('set-end').style.background = '#007cba';
+    document.getElementById('set-start').style.background = COLORS.PRIMARY;
+    document.getElementById('set-end').style.background = COLORS.PRIMARY;
 }
 
 async function findRoute() {
@@ -157,7 +169,7 @@ async function findRoute() {
 
         // Add route to map
         const routeLine = L.polyline(result.route.coordinates.map(c => [c[1], c[0]]), {
-            color: '#ffff00',
+            color: COLORS.ROUTE,
             weight: 5,
             opacity: 0.8
         }).addTo(routeLayer);
@@ -205,12 +217,12 @@ function startMeasuring() {
 
     if (measuring) {
         button.innerHTML = 'Stop Measuring';
-        button.style.background = '#ff6b6b';
+        button.style.background = COLORS.DANGER;
         map.getContainer().style.cursor = 'crosshair';
         document.getElementById('measurement-info').innerHTML = 'Click on map to start measuring...';
     } else {
         button.innerHTML = 'Start Measuring';
-        button.style.background = '#007cba';
+        button.style.background = COLORS.PRIMARY;
         map.getContainer().style.cursor = '';
         if (measurePoints.length > 0) {
             document.getElementById('measurement-info').innerHTML = `Total distance: ${totalDistance.toFixed(2)} km`;
@@ -237,7 +249,7 @@ function addMeasurePoint(latlng) {
         }
 
         measureLine = L.polyline(measurePoints.map(p => [p.lat, p.lng]), {
-            color: '#ffa500',
+            color: COLORS.WARNING,
             weight: 3,
             opacity: 0.8,
             dashArray: '10, 5'
@@ -272,7 +284,7 @@ function clearMeasurements() {
     if (measuring) {
         measuring = false;
         document.getElementById('start-measure').innerHTML = 'Start Measuring';
-        document.getElementById('start-measure').style.background = '#007cba';
+        document.getElementById('start-measure').style.background = COLORS.PRIMARY;
         map.getContainer().style.cursor = '';
     }
 }
@@ -301,7 +313,7 @@ async function loadData(dataset, layer, color) {
                 const props = feature.properties;
                 const popup =
                     '<strong>' + (props.road_classification_number || 'Unknown') + '</strong><br>' +
-                    '<strong>Name:</strong> ' + (props.name_1 || 'Unnamed') + '<br>' +
+                    '<strong>Type:</strong> ' + (props.road_classification || 'Unknown') + '<br>' +
                     '<strong>Length:</strong> ' + (props.length ? (props.length/1000).toFixed(2) + ' km' : 'Unknown');
                 leafletLayer.bindPopup(popup);
             }
@@ -314,7 +326,7 @@ async function loadData(dataset, layer, color) {
 
 function updateLayers() {
     if (map.hasLayer(motorwayLayer)) {
-        loadData('motorways', motorwayLayer, '#ff6b6b');
+        loadData('motorways', motorwayLayer, COLORS.DANGER);
     }
 }
 
@@ -324,7 +336,7 @@ map.on('moveend zoomend', updateLayers);
 document.getElementById('motorways-toggle').addEventListener('change', function(e) {
     if (e.target.checked) {
         map.addLayer(motorwayLayer);
-        loadData('motorways', motorwayLayer, '#ff6b6b');
+        loadData('motorways', motorwayLayer, COLORS.DANGER);
     } else {
         map.removeLayer(motorwayLayer);
     }
