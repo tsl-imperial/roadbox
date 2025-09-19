@@ -1,0 +1,13 @@
+# RoadBox Configuration
+# Simple YAML configuration for the road network analysis application
+
+# Pathfinding algorithm settings
+pathfinding_tolerance: 0.5  # Maximum distance to search for nearby roads (degrees)
+network_tolerance: 0.002    # Road endpoint connection tolerance (~200m)
+
+# Web server settings
+debug: true
+host: "0.0.0.0"
+port: 5001
+threaded: true
+use_reloader: true

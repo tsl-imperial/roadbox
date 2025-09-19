@@ -6,6 +6,7 @@ Run this to start the RoadBox server
 
 import os
 import sys
+import yaml
 from pathlib import Path
 
 def check_requirements():
@@ -13,7 +14,7 @@ def check_requirements():
 
     # Check required data files
     required_files = [
-        'motorways.fgb'
+        'data/motorways.fgb'
     ]
 
     missing_files = []
@@ -25,23 +26,15 @@ def check_requirements():
         print("❌ Missing required data files:")
         for file in missing_files:
             print(f"   - {file}")
-        print("\n💡 Run the data conversion scripts first:")
-        print("   python3 convert_to_flatgeobuf.py")
         return False
 
-    # Check Python dependencies
-    try:
-        import flask
-        import flask_cors
-        import geopandas
-        import networkx
-        import shapely
-    except ImportError as e:
-        print(f"❌ Missing Python dependency: {e}")
-        print("\n💡 Install with: pip3 install flask flask-cors geopandas networkx shapely flatgeobuf")
-        return False
 
     return True
+
+def load_config():
+    """Load configuration from YAML file"""
+    with open('config.yml', 'r') as f:
+        return yaml.safe_load(f)
 
 def start_server():
     """Start the roads server"""
@@ -49,36 +42,33 @@ def start_server():
     if not check_requirements():
         sys.exit(1)
 
-    print("🚀 Starting RoadBox Server...")
+    # Load configuration
+    config = load_config()
+
+    print("Starting RoadBox Server...")
     print("="*50)
 
     # Import and run the RoadBox app
-    from app import app
+    from src.app import app
     import webbrowser
     from threading import Timer
 
     def open_browser():
-        webbrowser.open('http://localhost:5001')
+        webbrowser.open(f'http://localhost:{config["port"]}')
 
-    print("📊 Features:")
-    print("  • FlatGeobuf backend (3x faster loading)")
-    print("  • Viewport-based loading (only visible data)")
-    print("  • Level-of-detail (zoom-based filtering)")
-    print("  • Real-time pathfinding with NetworkX")
-    print("  • Click to set start/end points")
     print()
-    print("🌐 Opening browser at http://localhost:5001")
+    print(f"🌐 Opening browser at http://localhost:{config['port']}")
 
     # Open browser after short delay
     Timer(2.0, open_browser).start()
 
     try:
         app.run(
-            debug=True,  # Enable debug for auto-reload
-            host='0.0.0.0',
-            port=5001,
-            threaded=True,
-            use_reloader=True
+            debug=config['debug'],
+            host=config['host'],
+            port=config['port'],
+            threaded=config['threaded'],
+            use_reloader=config['use_reloader']
         )
     except KeyboardInterrupt:
         print("\n👋 Server stopped by user")
@@ -86,7 +76,10 @@ def start_server():
         print(f"❌ Server error: {e}")
 
 if __name__ == "__main__":
-    print("""
+    # Load config to show correct port in banner
+    config = load_config()
+
+    print(f"""
 ╔══════════════════════════════════════════════════╗
 ║                    ROADBOX                       ║
 ╠══════════════════════════════════════════════════╣
@@ -101,7 +94,7 @@ if __name__ == "__main__":
 ║      https://transport-systems.imperial.ac.uk    ║
 ║                                                  ║
 ║                                                  ║
-║  Server will open at: http://localhost:5001      ║
+║  Server will open at: http://localhost:{config['port']:<4}      ║
 ║                                                  ║
 ╚══════════════════════════════════════════════════╝
     """)

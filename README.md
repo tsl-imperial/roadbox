@@ -22,14 +22,14 @@ cd roadbox
 pip install -r requirements.txt
 ```
 
-3. The motorways.fgb file is included in the repository
+3. The data/motorways.fgb file is included in the repository
 
 4. Run the server:
 ```bash
 python3 start.py
 ```
 
-The server will start and automatically open your browser at `http://localhost:5001`
+The server will start and automatically open your browser at the configured port (default: http://localhost:5001)
 
 ## Usage
 
@@ -56,15 +56,18 @@ The server will start and automatically open your browser at `http://localhost:5
 
 ### Architecture
 
-- **Backend**: Flask server with NetworkX/iGraph pathfinding
+- **Backend**: Flask server with hybrid NetworkX/iGraph pathfinding
+  - NetworkX: Network construction and analysis (educational, readable)
+  - iGraph: High-speed pathfinding with Dijkstra's algorithm
 - **Frontend**: Leaflet.js with dark CartoDB basemap
 - **Data Format**: FlatGeobuf for optimal performance
-- **Routing Algorithm**: Dijkstra's algorithm with motorway optimization
+- **Configuration**: Simple YAML configuration (config.yml)
+- **Routing Algorithm**: Dijkstra's shortest path algorithm
 
 
 ### Data Source
 
-The motorways.fgb file (included in this repository) contains UK motorway network data derived from Ordnance Survey OpenRoads dataset.
+The data/motorways.fgb file (included in this repository) contains UK motorway network data derived from Ordnance Survey OpenRoads dataset.
 
 **Original Data Source**: [OS OpenRoads](https://osdatahub.os.uk/downloads/open/OpenRoads)
 
@@ -79,15 +82,19 @@ The file includes:
 
 The codebase is modular and extensible:
 
-- **Routing algorithms**: Modify `build_road_network()` in `pathfinding.py`
-- **Map styling**: Edit `static/css/style.css`
-- **UI components**: Update `templates/index.html` and `static/js/app.js`
+- **Routing algorithms**: Modify `build_road_network()` in `src/network.py`
+- **Data loading**: Edit functions in `src/data.py`
+- **API endpoints**: Update `src/api.py`
+- **Configuration**: Modify `config.yml`
+- **Map styling**: Edit `static/style.css`
+- **UI components**: Update `templates/index.html` and `static/app.js`
 
 ### API Endpoints
 
 - `GET /` - Main application page
-- `GET /api/data/<dataset>` - Get road data for viewport
+- `GET /api/data/<dataset>` - Get road data for viewport (supports bbox filtering)
 - `POST /api/route` - Calculate route between two points
+- `GET /api/health` - Health check endpoint
 
 ## License
 
